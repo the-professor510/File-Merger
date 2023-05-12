@@ -60,7 +60,6 @@ def MergeFile():
     print("\nReading in Files")
 
     data = []
-    correctData = []
 
 
     #gets the data from the files
@@ -70,7 +69,7 @@ def MergeFile():
 
     print("Read in Files")
 
-    dataConcate = data[0]
+    dataConcate = data[0][:,0:numY+1]
 
     if( numY+1 >len(dataConcate[0])):
         print("\nThe value entered for number of dependent variables is too large")
