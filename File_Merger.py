@@ -32,9 +32,12 @@ def MergeFile():
     print("\nPlease enter the number of dependent variables in each file, e.g. for just a single y value enter 1")
     numY = int(input("Enter the number of dependent variables: "))
 
+    print("\nIf there is extra data at the start of each file please enter the number of rows of this data, if nothing enter '0'")
+    numRowsHeader = int(input("Enter number of rows: "))
+
     print("\nIf there is extra data at the end of each file please enter the number of rows of this data, if nothing enter '0'")
-    numRows = int(input("Enter number of rows: "))
-    numRows+=1
+    numRowsFooter = int(input("Enter number of rows: "))
+    #numRowsFooter+=1
 
     print("\nPlease enter the name you would like for the merged file")
     fileName = input("Enter the file name: ")
@@ -64,7 +67,10 @@ def MergeFile():
 
     #gets the data from the files
     for x in files:
-        rawdata = pd.read_csv((folderPathway+"/"+x), sep=delimeter, header=None, engine='python', skipfooter=numRows)
+        if numRowsHeader == 0:
+            rawdata = pd.read_csv((folderPathway+"/"+x), sep=delimeter, header=None, engine='python', skipfooter=numRowsFooter)
+        else:
+            rawdata = pd.read_csv((folderPathway+"/"+x), sep=delimeter, header=None, engine = 'python', skiprows=numRowsHeader, skipfooter=numRowsFooter, on_bad_lines='skip')
         data.append(rawdata.to_numpy())
 
     print("Read in Files")
