@@ -13,10 +13,8 @@
 print("ImportingPackages")
 import os
 from os.path import isfile, join
-
 import numpy as np
 import pandas as pd
-import csv
 
 def MergeFile():
     print("\nPlese enter the full path to a folder containing all the files you would like to merge")
@@ -37,7 +35,22 @@ def MergeFile():
 
     print("\nIf there is extra data at the end of each file please enter the number of rows of this data, if nothing enter '0'")
     numRowsFooter = int(input("Enter number of rows: "))
-    #numRowsFooter+=1
+
+    transpose = False
+    while True:
+        print("\nWould you like to transpose the merged data?")
+        transposeTxt = input("Please enter 'Y' or 'N': ")
+
+        if(transposeTxt.upper() == "N"):
+            transpose = False
+            break;
+        elif (transposeTxt.upper() == "Y"):
+            transpose = True
+            break;
+        else:
+            print("Please only enter \"Y\" or \"N\"")
+
+
 
     print("\nPlease enter the name you would like for the merged file")
     fileName = input("Enter the file name: ")
@@ -49,6 +62,7 @@ def MergeFile():
         print("\nError with FilePathway, ensure that you entered it properly")
         return()
 
+    #get list of the file pathways
     files = []
     for x in paths:
         if(isfile(join(folderPathway,x))):
@@ -62,8 +76,8 @@ def MergeFile():
 
     print("\nReading in Files")
 
-    data = []
 
+    data = []
 
     #gets the data from the files
     for x in files:
@@ -75,9 +89,10 @@ def MergeFile():
 
     print("Read in Files")
 
-    dataConcate = data[0][:,0:numY+1]
+    dataConcate = data[0][:,1:numY+1]
 
-    if( numY+1 >len(dataConcate[0])):
+    #checks that the number of dependent variables is acceptable
+    if( numY+1 >len(data[0][:,0])):
         print("\nThe value entered for number of dependent variables is too large")
         return()
     elif (numY<1):
@@ -86,6 +101,7 @@ def MergeFile():
 
     print("Begining to Merge")
 
+    #merges all of the data in the files
     for i in range(1,len(data)):
         dataTemp = data[i][:,1:numY+1]
         if(len(dataConcate) == len(dataTemp)):
@@ -95,8 +111,8 @@ def MergeFile():
             return
 
 
-            
-    header = ["Independent Variable"]
+    #creates a header from the file names    
+    header = []
     if numY > 1:
         for x in files:
             header.append(x)
@@ -104,20 +120,26 @@ def MergeFile():
                 header += [""]
     else:
         header += files
+    
+    #creates a new data frame with all of the merged data
+    df = pd.DataFrame(dataConcate, columns = header, index = data[0][:,0])
 
-
-
+    #creates the file path for the csv with the merged data
     fileName +=".csv"
     filePath = os.path.join(folderPathway,fileName)
-    with open(filePath, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile, delimiter=',',quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(header)
-        writer.writerows(dataConcate)
+
+    #transposes the data
+    if transpose:
+        df = df.transpose()
+    
+    #writes the merged data to a csv
+    df.to_csv(filePath)
 
     print("Files successfully Merged")
     return()
 #end def MergeFile
 
+#Main, calling will run merge file
 def Main():
     print("\n This program will merge flat files (e.g. csv, txt, ascii) that are of the same format"
             + "\n e.g. same number of rows, columns, header, and same delimiter"
